@@ -46,7 +46,9 @@ func (e *encoder) write(value uint64, nbits uint64) error {
 
 	// Write any bits that might be part of previous bitfield definitions
 	if e.bitOffset != 0 {
-		e.currentByte |= uint8(value << e.bitOffset)
+		//e.currentByte |= uint8(value << e.bitOffset)
+		e.currentByte = uint8(e.currentByte << nbits)
+		e.currentByte |= uint8(value)
 
 		remainingBits := 8 - e.bitOffset
 		if nbits < remainingBits {
@@ -63,7 +65,8 @@ func (e *encoder) write(value uint64, nbits uint64) error {
 	}
 
 	for nbits != 0 {
-		e.currentByte = uint8(value & ((1 << nbits)-1))
+		//e.currentByte = uint8(value & ((1 << nbits) - 1))
+		e.currentByte = uint8(value & ((1 << nbits) - 1))
 		if nbits < 8 {
 			e.bitOffset += nbits
 			return nil

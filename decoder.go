@@ -55,7 +55,7 @@ func (d *decoder) read(nbits uint64) (uint64, error) {
 	// Check for carry-over bits from previous bitfields
 	if d.bitOffset != 0 {
 		mask := uint8(math.Pow(2, float64(nbits)) - 1)
-		value = uint64((d.currentByte >> d.bitOffset) & mask)
+		value = uint64((d.currentByte >> (8 - d.bitOffset - nbits)) & mask)
 
 		if d.bitOffset+nbits < 8 {
 			d.bitOffset += nbits
@@ -78,11 +78,13 @@ func (d *decoder) read(nbits uint64) (uint64, error) {
 
 		if nbits < 8 {
 			mask := uint8(math.Pow(2, float64(nbits)) - 1)
-			value |= uint64(d.currentByte&mask) << offset
+			value = value << 8
+			value |= uint64(d.currentByte & mask >> (8 - nbits))
 			d.bitOffset += nbits
 			return value, nil
 		} else {
-			value |= uint64(d.currentByte) << offset
+			value = value << 8
+			value |= uint64(d.currentByte)
 			offset += 8
 			nbits -= 8
 		}
